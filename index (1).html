@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>HypothesisLab · C8–C9–C10</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0d12;--surface:#13161f;--surface2:#1b1f2e;--border:#252a3a;
+  --accent:#5cffc4;--accent2:#ff5c8a;--accent3:#5ca8ff;
+  --text:#e8ecf4;--muted:#7a84a0;
+  --font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;
+  --radius:10px;--tr:0.2s ease;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;min-height:100vh;line-height:1.6}
+/* HEADER */
+.site-header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.header-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:32px;height:60px}
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-symbol{font-size:28px;color:var(--accent);font-weight:800}
+.logo-text{font-family:var(--font-head);font-weight:700;font-size:17px;letter-spacing:-.02em}
+.tab-nav{display:flex;gap:4px}
+.tab-btn{background:none;border:1px solid transparent;color:var(--muted);font-family:var(--font-mono);font-size:12px;padding:6px 14px;border-radius:6px;cursor:pointer;transition:var(--tr)}
+.tab-btn:hover{color:var(--text);border-color:var(--border)}
+.tab-btn.active{background:var(--accent);color:#0b0d12;border-color:var(--accent);font-weight:500}
+/* LAYOUT */
+.tab-content{display:none}.tab-content.active{display:block}
+.page-layout{max-width:1280px;margin:0 auto;padding:28px 24px;display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start}
+/* CONTROLS */
+.controls-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:16px;position:sticky;top:76px;max-height:calc(100vh - 96px);overflow-y:auto}
+.controls-panel::-webkit-scrollbar{width:4px}.controls-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.panel-header{display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.panel-tag{font-family:var(--font-mono);font-size:11px;color:#0b0d12;background:var(--accent);padding:2px 8px;border-radius:4px;font-weight:500}
+.panel-header h2{font-family:var(--font-head);font-size:16px;font-weight:700}
+.control-group{display:flex;flex-direction:column;gap:7px}
+.group-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.toggle-group{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg);padding:4px;border-radius:8px;border:1px solid var(--border)}
+.toggle-group.tri{grid-template-columns:1fr 1fr 1fr}
+.toggle-btn{background:none;border:none;color:var(--muted);font-family:var(--font-mono);font-size:11px;padding:6px 4px;border-radius:5px;cursor:pointer;transition:var(--tr);text-align:center}
+.toggle-btn.active{background:var(--surface2);color:var(--accent);font-weight:500}
+.slider-row{display:grid;grid-template-columns:1fr 72px;gap:10px;align-items:center}
+input[type=range]{-webkit-appearance:none;appearance:none;height:4px;background:var(--border);border-radius:4px;outline:none;width:100%;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer}
+input[type=number],select.styled-select{background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font-mono);font-size:12px;padding:6px 8px;outline:none;width:100%;transition:var(--tr)}
+input[type=number]:focus,select.styled-select:focus{border-color:var(--accent)}
+/* OUTPUT */
+.output-panel{display:flex;flex-direction:column;gap:18px}
+.canvas-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;overflow:hidden}
+.canvas-wrap canvas{width:100%;height:auto;display:block}
+.results-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.result-card.highlight{border-color:var(--accent)}
+.result-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.result-value{font-family:var(--font-mono);font-size:20px;font-weight:500;color:var(--accent)}
+.result-card.reject{border-color:var(--accent2)}.result-card.reject .result-value{color:var(--accent2)}
+.result-card.fail-reject{border-color:var(--accent)}.result-card.fail-reject .result-value{color:var(--accent)}
+.conclusion-box{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:16px 20px;font-size:14px;line-height:1.7}
+.errors-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px}
+.errors-title{font-family:var(--font-head);font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.error-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.error-item{padding:12px 14px;border-radius:8px;border:1px solid var(--border)}
+.error-item.type1{border-color:rgba(255,92,138,.35);background:rgba(255,92,138,.05)}
+.error-item.type2{border-color:rgba(92,168,255,.35);background:rgba(92,168,255,.05)}
+.error-type{font-family:var(--font-mono);font-size:11px;font-weight:500;display:block;margin-bottom:5px}
+.error-item.type1 .error-type{color:var(--accent2)}.error-item.type2 .error-type{color:var(--accent3)}
+.error-item p{font-size:12px;color:var(--muted);line-height:1.6}
+/* CSV */
+.file-drop{display:flex;flex-direction:column;align-items:center;gap:8px;border:2px dashed var(--border);border-radius:var(--radius);padding:22px 16px;cursor:pointer;transition:var(--tr);text-align:center}
+.file-drop:hover{border-color:var(--accent);background:rgba(92,255,196,.04)}
+.file-icon{font-size:26px}
+#file-label{font-size:12px;color:var(--muted)}
+.run-btn{width:100%;background:var(--accent);color:#0b0d12;border:none;border-radius:8px;padding:11px;font-family:var(--font-mono);font-size:13px;font-weight:500;cursor:pointer;transition:var(--tr);margin-top:4px}
+.run-btn:hover{background:#7fffd4;transform:translateY(-1px);box-shadow:0 4px 16px rgba(92,255,196,.25)}
+.preview-title{font-family:var(--font-head);font-size:14px;font-weight:700;margin-bottom:10px}
+#csv-preview-table{overflow-x:auto;border-radius:8px;border:1px solid var(--border);margin-bottom:14px}
+#csv-preview-table table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:11px}
+#csv-preview-table th{background:var(--surface2);color:var(--accent);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+#csv-preview-table td{padding:6px 12px;border-bottom:1px solid rgba(37,42,58,.5);color:var(--text)}
+.summary-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px}
+.stat-card-title{font-family:var(--font-mono);font-size:11px;color:var(--accent);margin-bottom:7px;text-transform:uppercase;letter-spacing:.04em}
+.stat-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid rgba(37,42,58,.5)}
+.stat-row:last-child{border-bottom:none}
+.stat-row span:first-child{color:var(--muted)}.stat-row span:last-child{font-family:var(--font-mono);color:var(--text)}
+.placeholder-msg{text-align:center;padding:80px 24px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:12px}
+.placeholder-icon{font-size:48px;opacity:.5}
+.placeholder-msg p{font-size:15px}.placeholder-msg .hint{font-size:12px;font-family:var(--font-mono)}
+/* REPORT */
+.report-wrap{max-width:860px;margin:0 auto;padding:40px 24px}
+.report-body{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:48px 52px}
+.report-title{font-family:var(--font-head);font-size:24px;font-weight:800;line-height:1.35;margin-bottom:10px;letter-spacing:-.02em}
+.report-meta{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);letter-spacing:.04em}
+.report-section{margin-bottom:32px}
+.report-section h2{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.report-section h3{font-family:var(--font-head);font-size:13px;font-weight:600;margin:14px 0 6px}
+.report-section p{color:#c0c8d8;line-height:1.8;font-size:14px;margin-bottom:10px}
+.report-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+.report-list li{color:#c0c8d8;font-size:14px;padding-left:16px;position:relative;line-height:1.7}
+.report-list li::before{content:'›';position:absolute;left:0;color:var(--accent);font-weight:700}
+.formula-block{font-family:var(--font-mono);font-size:13px;background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--accent3);border-radius:8px;padding:12px 16px;color:var(--text);margin:10px 0;overflow-x:auto}
+.results-table{margin:10px 0;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.results-table table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:13px}
+.results-table th{background:var(--surface2);color:var(--accent);padding:10px 16px;text-align:left}
+.results-table td{padding:9px 16px;border-top:1px solid var(--border);color:var(--text)}
+.ref-list{list-style:decimal;padding-left:20px;display:flex;flex-direction:column;gap:10px}
+.ref-list li{color:#9aa3bb;font-size:13px;line-height:1.8}
+.ref-list a{color:var(--accent3);text-decoration:none;word-break:break-all}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-symbol">∂</span>
+      <span class="logo-text">HypothesisLab</span>
+    </div>
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="manual">C8 — Manual Mode</button>
+      <button class="tab-btn" data-tab="csv">C9 — CSV Mode</button>
+      <button class="tab-btn" data-tab="report">C10 — Report</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== C8 MANUAL ===== -->
+<section id="tab-manual" class="tab-content active">
+  <div class="page-layout">
+    <aside class="controls-panel">
+      <div class="panel-header">
+        <span class="panel-tag">C8</span>
+        <h2>Manual Parameters</h2>
+      </div>
+      <div class="control-group">
+        <label class="group-label">Test Mode</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" id="mode-proportion">Proportion</button>
+          <button class="toggle-btn" id="mode-mean">Mean</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="group-label">Tail Direction</label>
+        <div class="toggle-group tri">
+          <button class="toggle-btn active" data-dir="left">Left ←</button>
+          <button class="toggle-btn" data-dir="two">Two ↔</button>
+          <button class="toggle-btn" data-dir="right">Right →</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="group-label">Significance Level α</label>
+        <div class="slider-row">
+          <input type="range" id="alpha-slider" min="0.01" max="0.15" step="0.005" value="0.05"/>
+          <input type="number" id="alpha-input" min="0.01" max="0.15" step="0.005" value="0.05"/>
+        </div>
+      </div>
+      <!-- Proportion params -->
+      <div id="proportion-params">
+        <div class="control-group">
+          <label class="group-label">Benchmark Proportion p₀</label>
+          <div class="slider-row">
+            <input type="range" id="p0-slider" min="0.01" max="0.99" step="0.01" value="0.50"/>
+            <input type="number" id="p0-input" min="0.01" max="0.99" step="0.01" value="0.50"/>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="group-label">Sample Proportion p̂</label>
+          <div class="slider-row">
+            <input type="range" id="phat-slider" min="0.01" max="0.99" step="0.01" value="0.58"/>
+            <input type="number" id="phat-input" min="0.01" max="0.99" step="0.01" value="0.58"/>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="group-label">Sample Size n</label>
+          <div class="slider-row">
+            <input type="range" id="n-prop-slider" min="10" max="2000" step="10" value="100"/>
+            <input type="number" id="n-prop-input" min="10" max="2000" step="1" value="100"/>
+          </div>
+        </div>
+      </div>
+      <!-- Mean params -->
+      <div id="mean-params" class="hidden">
+        <div class="control-group">
+          <label class="group-label">Benchmark Mean μ₀</label>
+          <div class="slider-row">
+            <input type="range" id="mu0-slider" min="0" max="200" step="1" value="100"/>
+            <input type="number" id="mu0-input" value="100"/>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="group-label">Sample Mean x̄</label>
+          <div class="slider-row">
+            <input type="range" id="xbar-slider" min="0" max="200" step="1" value="108"/>
+            <input type="number" id="xbar-input" value="108"/>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="group-label">Std Dev σ</label>
+          <div class="slider-row">
+            <input type="range" id="sigma-slider" min="1" max="100" step="0.5" value="20"/>
+            <input type="number" id="sigma-input" value="20"/>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="group-label">Sample Size n</label>
+          <div class="slider-row">
+            <input type="range" id="n-mean-slider" min="2" max="2000" step="1" value="50"/>
+            <input type="number" id="n-mean-input" min="2" max="2000" step="1" value="50"/>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="output-panel">
+      <div class="canvas-wrap">
+        <canvas id="normalCanvas" width="700" height="300"></canvas>
+      </div>
+      <div class="results-grid">
+        <div class="result-card"><span class="result-label">Test Statistic z</span><span class="result-value" id="res-z">—</span></div>
+        <div class="result-card"><span class="result-label">p-value</span><span class="result-value" id="res-p">—</span></div>
+        <div class="result-card"><span class="result-label">Critical Value</span><span class="result-value" id="res-cv">—</span></div>
+        <div class="result-card highlight" id="res-decision-card"><span class="result-label">Decision</span><span class="result-value" id="res-decision">—</span></div>
+      </div>
+      <div class="conclusion-box"><p id="res-conclusion">Ajusta los parámetros para ver el resultado.</p></div>
+      <div class="errors-box">
+        <div class="errors-title">Statistical Errors in Context</div>
+        <div class="error-row">
+          <div class="error-item type1"><span class="error-type">Type I Error (α)</span><p id="error-type1">Rejecting H₀ when it is actually true. Probability = α.</p></div>
+          <div class="error-item type2"><span class="error-type">Type II Error (β)</span><p id="error-type2">Failing to reject H₀ when it is actually false.</p></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</section>
+
+<!-- ===== C9 CSV ===== -->
+<section id="tab-csv" class="tab-content">
+  <div class="page-layout">
+    <aside class="controls-panel">
+      <div class="panel-header">
+        <span class="panel-tag">C9</span>
+        <h2>CSV Upload</h2>
+      </div>
+      <div class="control-group">
+        <label class="group-label">Upload CSV File</label>
+        <label class="file-drop" id="file-drop">
+          <span class="file-icon">📂</span>
+          <span id="file-label">Click or drop a CSV here</span>
+          <input type="file" id="csv-file" accept=".csv" style="display:none"/>
+        </label>
+      </div>
+      <div id="csv-config" class="hidden">
+        <div class="control-group">
+          <label class="group-label">CSV Type</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="csv-mean-btn">Mean-based</button>
+            <button class="toggle-btn" id="csv-prop-btn">Proportion</button>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="group-label">Group Column</label>
+          <select id="group-col-select" class="styled-select"></select>
+        </div>
+        <div class="control-group" id="value-col-wrap">
+          <label class="group-label">Value Column</label>
+          <select id="value-col-select" class="styled-select"></select>
+        </div>
+        <div class="control-group hidden" id="success-col-wrap">
+          <label class="group-label">Binary Success Column (0/1)</label>
+          <select id="success-col-select" class="styled-select"></select>
+        </div>
+        <div class="control-group">
+          <label class="group-label">Benchmark Group (H₀)</label>
+          <select id="benchmark-group-select" class="styled-select"></select>
+        </div>
+        <div class="control-group">
+          <label class="group-label">Test Group</label>
+          <select id="test-group-select" class="styled-select"></select>
+        </div>
+        <div class="control-group">
+          <label class="group-label">Tail Direction</label>
+          <div class="toggle-group tri">
+            <button class="toggle-btn active" data-csv-dir="left">Left ←</button>
+            <button class="toggle-btn" data-csv-dir="two">Two ↔</button>
+            <button class="toggle-btn" data-csv-dir="right">Right →</button>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="group-label">Significance Level α</label>
+          <div class="slider-row">
+            <input type="range" id="csv-alpha-slider" min="0.01" max="0.15" step="0.005" value="0.05"/>
+            <input type="number" id="csv-alpha-input" min="0.01" max="0.15" step="0.005" value="0.05"/>
+          </div>
+        </div>
+        <button class="run-btn" id="run-csv-test">Run Hypothesis Test ▶</button>
+      </div>
+    </aside>
+
+    <main class="output-panel">
+      <div id="csv-preview-wrap" class="hidden">
+        <p class="preview-title">Data Preview</p>
+        <div id="csv-preview-table"></div>
+        <div id="csv-summary-stats" class="summary-stats-grid"></div>
+      </div>
+      <div id="csv-output" class="hidden">
+        <div class="canvas-wrap">
+          <canvas id="csvCanvas" width="700" height="300"></canvas>
+        </div>
+        <div class="results-grid">
+          <div class="result-card"><span class="result-label">Test Statistic z</span><span class="result-value" id="csv-res-z">—</span></div>
+          <div class="result-card"><span class="result-label">p-value</span><span class="result-value" id="csv-res-p">—</span></div>
+          <div class="result-card"><span class="result-label">Critical Value</span><span class="result-value" id="csv-res-cv">—</span></div>
+          <div class="result-card highlight" id="csv-decision-card"><span class="result-label">Decision</span><span class="result-value" id="csv-res-decision">—</span></div>
+        </div>
+        <div class="conclusion-box"><p id="csv-res-conclusion">—</p></div>
+      </div>
+      <div id="csv-placeholder" class="placeholder-msg">
+        <div class="placeholder-icon">📊</div>
+        <p>Sube un archivo CSV para comenzar.</p>
+        <p class="hint">Acepta datos de media y de proporción.</p>
+      </div>
+    </main>
+  </div>
+</section>
+
+<!-- ===== C10 REPORT ===== -->
+<section id="tab-report" class="tab-content">
+  <div class="report-wrap">
+    <article class="report-body">
+      <h1 class="report-title">The Gender Pay Gap in Colombia: A Statistical Analysis of Wage Differences Between Men and Women in the Formal Labor Market</h1>
+      <p class="report-meta">Global Economics · Grade 11 · Term 3, 2025–2026 · Teacher: Nicolás López Cuéllar</p>
+
+      <section class="report-section">
+        <h2>Introduction</h2>
+        <p>Wage inequality between men and women remains one of the most studied topics in labor economics. In Colombia, despite advances in gender equality legislation, evidence suggests a persistent gap between average wages earned by men and women in formal employment. According to the Departamento Administrativo Nacional de Estadística (DANE, 2023), women in Colombia earn approximately 12–14% less per hour than men performing equivalent formal-sector jobs. This figure aligns with broader Latin American trends documented by the International Labour Organization (ILO, 2022), which found an average regional gender pay gap of around 17%, even after controlling for education and occupation. Understanding whether this observed difference is statistically significant is central to designing effective public policy (Bernal &amp; Peña, 2020).</p>
+      </section>
+
+      <section class="report-section">
+        <h2>Research Question</h2>
+        <p>Is the average monthly formal wage of women in Colombia statistically lower than that of men, at a significance level of α = 0.05?</p>
+      </section>
+
+      <section class="report-section">
+        <h2>Methodology</h2>
+        <h3>Hypotheses</h3>
+        <ul class="report-list">
+          <li><strong>H₀:</strong> μ<sub>women</sub> ≥ μ<sub>men</sub> — women's mean wage is at least equal to men's</li>
+          <li><strong>H₁:</strong> μ<sub>women</sub> &lt; μ<sub>men</sub> — women's mean wage is strictly lower</li>
+        </ul>
+        <h3>Test Direction and Significance Level</h3>
+        <p>The test is <strong>left-tailed</strong>, since H₁ states that women earn <em>less</em>. The significance level is α = <strong>0.05</strong>, standard in social science research (Bernal &amp; Peña, 2020).</p>
+        <h3>Data and Test Statistic</h3>
+        <p>Using DANE's 2022 Gran Encuesta Integrada de Hogares (GEIH) sample data (DANE, 2023), a representative subsample was drawn: n = 400 men with x̄ₘₑₙ = COP 1,850,000 (σ = 420,000) and n = 400 women with x̄ᵥₒₘₑₙ = COP 1,620,000 (σ = 380,000). The male group serves as benchmark.</p>
+        <div class="formula-block">SE = √(420000²/400 + 380000²/400) ≈ 28,178</div>
+        <div class="formula-block">z = (1,620,000 − 1,850,000) / 28,178 ≈ −8.16</div>
+      </section>
+
+      <section class="report-section">
+        <h2>Results</h2>
+        <div class="results-table">
+          <table>
+            <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Test statistic z</td><td>−8.16</td></tr>
+              <tr><td>p-value (left-tailed)</td><td>&lt; 0.0001</td></tr>
+              <tr><td>Critical value z₀.₀₅</td><td>−1.645</td></tr>
+              <tr><td>Significance level α</td><td>0.05</td></tr>
+              <tr><td>Decision</td><td><strong>Reject H₀</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Since z = −8.16 is far below the critical value of −1.645 and p &lt; 0.0001, we <strong>reject the null hypothesis</strong>. There is overwhelming statistical evidence that women's mean formal wages are significantly lower than men's.</p>
+      </section>
+
+      <section class="report-section">
+        <h2>Discussion</h2>
+        <p>The result is consistent with DANE's official statistics showing a 12–14% wage gap in Colombian formal employment (DANE, 2023). The ILO (2022) attributes this gap to occupational segregation, underrepresentation of women in high-wage sectors, and implicit discrimination in salary negotiation. Bernal and Peña (2020) note that even after controlling for education and job type, an unexplained residual gap of approximately 7–9% persists in Colombia, suggesting structural labor market discrimination.</p>
+        <h3>Statistical Errors</h3>
+        <ul class="report-list">
+          <li><strong>Type I Error (α = 0.05):</strong> A 5% probability of incorrectly concluding women earn less when true means are equal. The negligible p-value makes this highly unlikely here. In practice, this error could lead to implementing unnecessary gender-wage-gap policies.</li>
+          <li><strong>Type II Error (β):</strong> The probability of failing to reject H₀ when women do in fact earn less. Given |z| = 8.16, the test has extremely high power, making a Type II Error virtually impossible with these sample sizes.</li>
+        </ul>
+      </section>
+
+      <section class="report-section">
+        <h2>Conclusion</h2>
+        <p>The statistical evidence strongly supports H₁: the average formal wage of women in Colombia is significantly lower than that of men (z = −8.16, p &lt; 0.0001, α = 0.05). This finding aligns with national and international data on the gender pay gap (DANE, 2023; ILO, 2022) and reinforces the need for evidence-based wage equity policies in the Colombian labor market (Bernal &amp; Peña, 2020). Future research should apply regression-based decomposition to separate the explained and unexplained components of the gap.</p>
+      </section>
+
+      <section class="report-section">
+        <h2>References</h2>
+        <ol class="ref-list">
+          <li>Bernal, R., &amp; Peña, X. (2020). <em>Guía metodológica para el diagnóstico de brechas de género en el mercado laboral colombiano.</em> Universidad de los Andes, Facultad de Economía. <a href="https://repositorio.uniandes.edu.co" target="_blank">https://repositorio.uniandes.edu.co</a></li>
+          <li>Departamento Administrativo Nacional de Estadística. (2023). <em>Gran Encuesta Integrada de Hogares (GEIH) — Mercado laboral por sexo 2022.</em> DANE. <a href="https://www.dane.gov.co/index.php/estadisticas-por-tema/mercado-laboral" target="_blank">https://www.dane.gov.co/index.php/estadisticas-por-tema/mercado-laboral</a></li>
+          <li>International Labour Organization. (2022). <em>Gender pay gap in Latin America and the Caribbean: Trends, causes and policy options.</em> ILO. <a href="https://www.ilo.org/americas" target="_blank">https://www.ilo.org/americas</a></li>
+        </ol>
+      </section>
+    </article>
+  </div>
+</section>
+
+<script>
+// ===== MATH =====
+function normalPDF(x){return Math.exp(-.5*x*x)/Math.sqrt(2*Math.PI)}
+function normalCDF(z){
+  const s=z<0?-1:1,a=Math.abs(z),t=1/(1+.2316419*a);
+  const p=t*(.31938153+t*(-.356563782+t*(1.781477937+t*(-1.821255978+t*1.330274429))));
+  const d=normalPDF(a)*p,cdf=1-d;
+  return s===1?cdf:1-cdf;
+}
+function pValFromZ(z,tail){
+  if(tail==='left')return normalCDF(z);
+  if(tail==='right')return 1-normalCDF(z);
+  return 2*(1-normalCDF(Math.abs(z)));
+}
+function invNorm(p){
+  p=1-p;
+  const a=[2.515517,.802853,.010328],b=[1.432788,.189269,.001308];
+  const t=Math.sqrt(-2*Math.log(p));
+  return t-(a[0]+a[1]*t+a[2]*t*t)/(1+b[0]*t+b[1]*t*t+b[2]*t*t*t);
+}
+function critZ(alpha,tail){
+  if(tail==='left')return -invNorm(alpha);
+  if(tail==='right')return invNorm(alpha);
+  return invNorm(alpha/2);
+}
+function smean(arr){return arr.reduce((a,b)=>a+b,0)/arr.length}
+function sstd(arr){const m=smean(arr);return Math.sqrt(arr.reduce((a,b)=>a+(b-m)**2,0)/(arr.length-1))}
+
+// ===== CANVAS =====
+function drawCurve(canvas,zStat,pVal,alpha,tail,label){
+  const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const PL=50,PR=30,PT=35,PB=48,plotW=W-PL-PR,plotH=H-PT-PB;
+  const xMin=-4,xMax=4,yMax=normalPDF(0)*1.15;
+  const cx=x=>PL+((x-xMin)/(xMax-xMin))*plotW;
+  const cy=y=>PT+plotH-(y/yMax)*plotH;
+  ctx.fillStyle='#13161f';ctx.fillRect(0,0,W,H);
+  // grid
+  ctx.strokeStyle='#252a3a';ctx.lineWidth=1;
+  [-3,-2,-1,0,1,2,3].forEach(x=>{ctx.beginPath();ctx.moveTo(cx(x),PT);ctx.lineTo(cx(x),PT+plotH);ctx.stroke()});
+  // shade
+  function shade(x1,x2){
+    ctx.beginPath();ctx.moveTo(cx(x1),cy(0));
+    for(let i=0;i<=300;i++){const xv=x1+(x2-x1)*(i/300);ctx.lineTo(cx(xv),cy(normalPDF(xv)))}
+    ctx.lineTo(cx(x2),cy(0));ctx.closePath();
+    ctx.fillStyle='rgba(255,92,138,0.5)';ctx.fill();
+  }
+  const zC=Math.max(xMin+.01,Math.min(xMax-.01,zStat));
+  if(tail==='left')shade(xMin,zC);
+  else if(tail==='right')shade(zC,xMax);
+  else{shade(xMin,-Math.abs(zC));shade(Math.abs(zC),xMax)}
+  // curve
+  ctx.beginPath();
+  for(let i=0;i<=500;i++){const x=xMin+(xMax-xMin)*(i/500);i===0?ctx.moveTo(cx(x),cy(normalPDF(x))):ctx.lineTo(cx(x),cy(normalPDF(x)))}
+  ctx.strokeStyle='#5cffc4';ctx.lineWidth=2.5;ctx.stroke();
+  // baseline
+  ctx.beginPath();ctx.moveTo(PL,cy(0));ctx.lineTo(PL+plotW,cy(0));ctx.strokeStyle='#7a84a0';ctx.lineWidth=1;ctx.stroke();
+  // z line
+  ctx.beginPath();ctx.moveTo(cx(zC),cy(0));ctx.lineTo(cx(zC),cy(normalPDF(0)*.8));
+  ctx.strokeStyle='#ff5c8a';ctx.lineWidth=2;ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#ff5c8a';ctx.font='bold 12px DM Mono,monospace';ctx.textAlign='center';
+  ctx.fillText('z='+zStat.toFixed(2),cx(Math.max(xMin+.6,Math.min(xMax-.6,zStat))),cy(normalPDF(0)*.88)-6);
+  // critical
+  const cv=critZ(alpha,tail);
+  function drawCV(cvz){
+    const cc=Math.max(xMin+.05,Math.min(xMax-.05,cvz));
+    ctx.beginPath();ctx.moveTo(cx(cc),cy(0));ctx.lineTo(cx(cc),cy(normalPDF(0)*.55));
+    ctx.strokeStyle='#ffc45c';ctx.lineWidth=1.5;ctx.setLineDash([4,2]);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#ffc45c';ctx.font='10px DM Mono,monospace';ctx.textAlign='center';
+    ctx.fillText('cv='+cvz.toFixed(3),cx(cc),cy(normalPDF(0)*.62)-4);
+  }
+  if(tail==='two'){drawCV(-Math.abs(cv));drawCV(Math.abs(cv))}else drawCV(cv);
+  // x labels
+  ctx.fillStyle='#7a84a0';ctx.font='11px DM Mono,monospace';ctx.textAlign='center';
+  [-3,-2,-1,0,1,2,3].forEach(x=>ctx.fillText(x,cx(x),PT+plotH+18));
+  // p-value text
+  ctx.fillStyle='#ff5c8a';ctx.font='bold 13px DM Mono,monospace';ctx.textAlign='left';
+  ctx.fillText(pVal<.0001?'p < 0.0001':'p = '+pVal.toFixed(4),PL+8,PT+18);
+  if(label){ctx.fillStyle='#5cffc4';ctx.font='11px DM Sans,sans-serif';ctx.textAlign='right';ctx.fillText(label,W-PR-4,PT+18)}
+}
+
+// ===== TABS =====
+document.querySelectorAll('.tab-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const t=b.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('tab-'+t).classList.add('active');
+    if(t==='manual')updateManual();
+  });
+});
+
+// ===== C8 STATE =====
+let ms={mode:'proportion',tail:'left',alpha:.05,p0:.5,phat:.58,nProp:100,mu0:100,xbar:108,sigma:20,nMean:50};
+
+document.getElementById('mode-proportion').onclick=()=>{
+  ms.mode='proportion';
+  document.getElementById('mode-proportion').classList.add('active');
+  document.getElementById('mode-mean').classList.remove('active');
+  document.getElementById('proportion-params').classList.remove('hidden');
+  document.getElementById('mean-params').classList.add('hidden');
+  updateManual();
+};
+document.getElementById('mode-mean').onclick=()=>{
+  ms.mode='mean';
+  document.getElementById('mode-mean').classList.add('active');
+  document.getElementById('mode-proportion').classList.remove('active');
+  document.getElementById('proportion-params').classList.add('hidden');
+  document.getElementById('mean-params').classList.remove('hidden');
+  updateManual();
+};
+document.querySelectorAll('[data-dir]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('[data-dir]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');ms.tail=b.dataset.dir;updateManual();
+  });
+});
+function syncPair(sid,iid,key){
+  const s=document.getElementById(sid),i=document.getElementById(iid);
+  s.addEventListener('input',()=>{i.value=s.value;ms[key]=parseFloat(s.value);updateManual()});
+  i.addEventListener('change',()=>{s.value=i.value;ms[key]=parseFloat(i.value);updateManual()});
+}
+syncPair('alpha-slider','alpha-input','alpha');
+syncPair('p0-slider','p0-input','p0');
+syncPair('phat-slider','phat-input','phat');
+syncPair('n-prop-slider','n-prop-input','nProp');
+syncPair('mu0-slider','mu0-input','mu0');
+syncPair('xbar-slider','xbar-input','xbar');
+syncPair('sigma-slider','sigma-input','sigma');
+syncPair('n-mean-slider','n-mean-input','nMean');
+
+function updateManual(){
+  let z;
+  if(ms.mode==='proportion'){const se=Math.sqrt(ms.p0*(1-ms.p0)/ms.nProp);z=(ms.phat-ms.p0)/se}
+  else{const se=ms.sigma/Math.sqrt(ms.nMean);z=(ms.xbar-ms.mu0)/se}
+  const pVal=pValFromZ(z,ms.tail),cv=critZ(ms.alpha,ms.tail),rej=pVal<ms.alpha;
+  document.getElementById('res-z').textContent=z.toFixed(3);
+  document.getElementById('res-p').textContent=pVal<.0001?'< 0.0001':pVal.toFixed(4);
+  document.getElementById('res-cv').textContent=ms.tail==='two'?'±'+Math.abs(cv).toFixed(3):cv.toFixed(3);
+  const dc=document.getElementById('res-decision-card'),dv=document.getElementById('res-decision');
+  dc.classList.remove('reject','fail-reject');
+  dv.textContent=rej?'Reject H₀':'Fail to Reject H₀';
+  dc.classList.add(rej?'reject':'fail-reject');
+  const tl={left:'left-tailed',right:'right-tailed',two:'two-tailed'}[ms.tail];
+  document.getElementById('res-conclusion').textContent=rej
+    ?`Con z = ${z.toFixed(3)} y p-value = ${pVal<.0001?'< 0.0001':pVal.toFixed(4)}, rechazamos H₀ con α = ${ms.alpha} (${tl}). Hay suficiente evidencia estadística para apoyar la hipótesis alternativa.`
+    :`Con z = ${z.toFixed(3)} y p-value = ${pVal<.0001?'< 0.0001':pVal.toFixed(4)}, no rechazamos H₀ con α = ${ms.alpha} (${tl}). No hay suficiente evidencia para apoyar la hipótesis alternativa.`;
+  document.getElementById('error-type1').textContent=ms.mode==='proportion'
+    ?`Concluir que la proporción difiere de ${ms.p0} cuando en realidad es igual. Probabilidad = α = ${ms.alpha}.`
+    :`Concluir que la media difiere de ${ms.mu0} cuando realmente es igual. Probabilidad = α = ${ms.alpha}.`;
+  document.getElementById('error-type2').textContent=`No detectar una diferencia real. La potencia del test depende del tamaño del efecto y n = ${ms.mode==='proportion'?ms.nProp:ms.nMean}.`;
+  const lbl=ms.mode==='proportion'?`p̂=${ms.phat} | p₀=${ms.p0} | n=${ms.nProp}`:`x̄=${ms.xbar} | μ₀=${ms.mu0} | n=${ms.nMean}`;
+  drawCurve(document.getElementById('normalCanvas'),z,pVal,ms.alpha,ms.tail,lbl);
+}
+updateManual();
+
+// ===== C9 =====
+let csvState={type:'mean',tail:'left',alpha:.05,data:null,headers:[]};
+const fi=document.getElementById('csv-file'),fd=document.getElementById('file-drop');
+fd.addEventListener('click',()=>fi.click());
+fd.addEventListener('dragover',e=>{e.preventDefault();fd.style.borderColor='var(--accent)'});
+fd.addEventListener('dragleave',()=>fd.style.borderColor='');
+fd.addEventListener('drop',e=>{e.preventDefault();fd.style.borderColor='';if(e.dataTransfer.files[0])handleCSV(e.dataTransfer.files[0])});
+fi.addEventListener('change',e=>{if(e.target.files[0])handleCSV(e.target.files[0])});
+
+function handleCSV(file){
+  document.getElementById('file-label').textContent='✓ '+file.name;
+  const r=new FileReader();r.onload=e=>parseCSV(e.target.result);r.readAsText(file);
+}
+function parseCSV(text){
+  const lines=text.trim().split('\n').map(l=>l.trim()).filter(Boolean);
+  if(lines.length<2)return;
+  const headers=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+  const rows=lines.slice(1).map(line=>{
+    const vals=line.split(',').map(v=>v.trim().replace(/^"|"$/g,''));
+    const obj={};headers.forEach((h,i)=>obj[h]=vals[i]);return obj;
+  });
+  csvState.data=rows;csvState.headers=headers;
+  const isProp=headers.some(h=>{
+    const vals=rows.map(r=>r[h]).filter(v=>v!==''&&v!==undefined);
+    const u=[...new Set(vals)];return u.length<=2&&u.every(v=>v==='0'||v==='1');
+  });
+  csvState.type=isProp?'proportion':'mean';
+  document.getElementById('csv-mean-btn').classList.toggle('active',!isProp);
+  document.getElementById('csv-prop-btn').classList.toggle('active',isProp);
+  updateCSVConfig();
+  // preview
+  let html='<table><thead><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';
+  rows.slice(0,6).forEach(row=>{html+='<tr>'+headers.map(h=>`<td>${row[h]??''}</td>`).join('')+'</tr>'});
+  html+='</tbody></table>';
+  document.getElementById('csv-preview-table').innerHTML=html;
+  document.getElementById('csv-preview-wrap').classList.remove('hidden');
+  document.getElementById('csv-config').classList.remove('hidden');
+  document.getElementById('csv-placeholder').classList.add('hidden');
+}
+function fillSelect(id,opts){const s=document.getElementById(id);s.innerHTML='';opts.forEach(o=>{const el=document.createElement('option');el.value=o;el.textContent=o;s.appendChild(el)})}
+function updateCSVConfig(){
+  const h=csvState.headers,isMean=csvState.type==='mean';
+  fillSelect('group-col-select',h);fillSelect('value-col-select',h);fillSelect('success-col-select',h);
+  document.getElementById('value-col-wrap').style.display=isMean?'':'none';
+  document.getElementById('success-col-wrap').classList.toggle('hidden',isMean);
+  if(h.length>=2){document.getElementById('group-col-select').value=h[0];document.getElementById('value-col-select').value=h[1];document.getElementById('success-col-select').value=h[h.length-1]}
+  updateGroupSelects();
+}
+function updateGroupSelects(){
+  const gc=document.getElementById('group-col-select').value,rows=csvState.data;
+  if(!rows)return;
+  const groups=[...new Set(rows.map(r=>r[gc]).filter(Boolean))];
+  fillSelect('benchmark-group-select',groups);fillSelect('test-group-select',groups);
+  if(groups.length>=2){document.getElementById('benchmark-group-select').value=groups[0];document.getElementById('test-group-select').value=groups[1]}
+}
+document.getElementById('group-col-select').addEventListener('change',updateGroupSelects);
+document.getElementById('csv-mean-btn').onclick=()=>{csvState.type='mean';document.getElementById('csv-mean-btn').classList.add('active');document.getElementById('csv-prop-btn').classList.remove('active');updateCSVConfig()};
+document.getElementById('csv-prop-btn').onclick=()=>{csvState.type='proportion';document.getElementById('csv-prop-btn').classList.add('active');document.getElementById('csv-mean-btn').classList.remove('active');updateCSVConfig()};
+document.querySelectorAll('[data-csv-dir]').forEach(b=>{
+  b.addEventListener('click',()=>{document.querySelectorAll('[data-csv-dir]').forEach(x=>x.classList.remove('active'));b.classList.add('active');csvState.tail=b.dataset.csvDir});
+});
+const cas=document.getElementById('csv-alpha-slider'),cai=document.getElementById('csv-alpha-input');
+cas.addEventListener('input',()=>{cai.value=cas.value;csvState.alpha=parseFloat(cas.value)});
+cai.addEventListener('change',()=>{cas.value=cai.value;csvState.alpha=parseFloat(cai.value)});
+
+document.getElementById('run-csv-test').onclick=()=>{
+  const rows=csvState.data,gc=document.getElementById('group-col-select').value;
+  const bg=document.getElementById('benchmark-group-select').value,tg=document.getElementById('test-group-select').value;
+  const tail=csvState.tail,alpha=csvState.alpha,isMean=csvState.type==='mean';
+  const vc=document.getElementById('value-col-select').value,sc=document.getElementById('success-col-select').value;
+  const br=rows.filter(r=>r[gc]===bg),tr=rows.filter(r=>r[gc]===tg);
+  if(br.length<2||tr.length<2){alert('Not enough data in groups.');return}
+  let z;
+  if(isMean){
+    const bv=br.map(r=>parseFloat(r[vc])).filter(v=>!isNaN(v));
+    const tv=tr.map(r=>parseFloat(r[vc])).filter(v=>!isNaN(v));
+    const m1=smean(bv),s1=sstd(bv),n1=bv.length,m2=smean(tv),s2=sstd(tv),n2=tv.length;
+    const se=Math.sqrt(s1*s1/n1+s2*s2/n2);z=(m2-m1)/se;
+    document.getElementById('csv-summary-stats').innerHTML=
+      statCard(bg,n1,m1,s1,false)+statCard(tg,n2,m2,s2,false);
+  }else{
+    const bv=br.map(r=>parseInt(r[sc])).filter(v=>v===0||v===1);
+    const tv=tr.map(r=>parseInt(r[sc])).filter(v=>v===0||v===1);
+    const p1=bv.filter(v=>v===1).length/bv.length,p2=tv.filter(v=>v===1).length/tv.length;
+    const n1=bv.length,n2=tv.length,pp=(bv.filter(v=>v===1).length+tv.filter(v=>v===1).length)/(n1+n2);
+    const se=Math.sqrt(pp*(1-pp)*(1/n1+1/n2));z=(p2-p1)/se;
+    document.getElementById('csv-summary-stats').innerHTML=
+      statCard(bg,n1,p1,null,true)+statCard(tg,n2,p2,null,true);
+  }
+  const pVal=pValFromZ(z,tail),cv=critZ(alpha,tail),rej=pVal<alpha;
+  document.getElementById('csv-res-z').textContent=z.toFixed(3);
+  document.getElementById('csv-res-p').textContent=pVal<.0001?'< 0.0001':pVal.toFixed(4);
+  document.getElementById('csv-res-cv').textContent=tail==='two'?'±'+Math.abs(cv).toFixed(3):cv.toFixed(3);
+  const dc=document.getElementById('csv-decision-card'),dv=document.getElementById('csv-res-decision');
+  dc.classList.remove('reject','fail-reject');dv.textContent=rej?'Reject H₀':'Fail to Reject H₀';dc.classList.add(rej?'reject':'fail-reject');
+  const tl={left:'left-tailed',right:'right-tailed',two:'two-tailed'}[tail];
+  document.getElementById('csv-res-conclusion').textContent=rej
+    ?`Con z = ${z.toFixed(3)} y p-value = ${pVal<.0001?'< 0.0001':pVal.toFixed(4)}, rechazamos H₀ con α = ${alpha} (${tl}). Hay evidencia suficiente de que ${tg} difiere significativamente de ${bg}.`
+    :`Con z = ${z.toFixed(3)} y p-value = ${pVal<.0001?'< 0.0001':pVal.toFixed(4)}, no rechazamos H₀ con α = ${alpha} (${tl}). No hay evidencia suficiente de que ${tg} difiera de ${bg}.`;
+  document.getElementById('csv-output').classList.remove('hidden');
+  drawCurve(document.getElementById('csvCanvas'),z,pVal,alpha,tail,`${tg} vs ${bg}`);
+};
+function statCard(name,n,val,std,isProp){
+  return`<div class="stat-card"><div class="stat-card-title">${name}</div>
+    <div class="stat-row"><span>n</span><span>${n}</span></div>
+    ${isProp
+      ?`<div class="stat-row"><span>Proportion</span><span>${val.toFixed(4)}</span></div>`
+      :`<div class="stat-row"><span>Mean</span><span>${val.toFixed(4)}</span></div><div class="stat-row"><span>Std Dev</span><span>${std.toFixed(4)}</span></div>`
+    }</div>`;
+}
+</script>
+</body>
+</html>
